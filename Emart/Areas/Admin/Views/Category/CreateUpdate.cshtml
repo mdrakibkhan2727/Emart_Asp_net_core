@@ -1,0 +1,45 @@
+﻿@model Emart.Models.ViewModels.CategoryVM
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="card border-light mt-3" style="width:100%">
+  <div class="card-header">@((Model.Category==null || Model.Category.Id==0) ?"Create" : "Update") Category</div>
+  <div class="card-body">
+     <form method="post" asp-action="CreateUpdate">
+         <input type="hidden" asp-for="Category.Id"/>
+          <div asp-validation-summary="All"></div>
+          <div class="mb-3">
+             <label asp-for="Category.Name"></label>
+             <input asp-for="Category.Name" class="form-control"/>
+             <span asp-validation-for="Category.Name"></span>
+         </div>
+         <div class="mb-3">
+             <label asp-for="Category.DisplayOrder"></label>
+             <input asp-for="Category.DisplayOrder" class="form-control"/>
+             <span asp-validation-for="Category.DisplayOrder"></span>
+         </div>
+            @if(Model.Category==null || Model.Category.Id == 0)
+            {
+             <div class="text-end">
+               <button class="btn btn-primary " type="submit">Create</button>
+             </div>
+            }
+            else
+            {
+            <div class="text-end">
+               <button class="btn btn-primary " type="submit">Update</button>
+            </div>
+            }
+        <a asp-action="Index" asp-controller="Category">Back To List</a>
+
+     </form>
+  </div>
+</div>
+
+@section scripts {
+    
+    @{
+        <partial name="_ValidationScriptsPartial"/>
+    }
+}
