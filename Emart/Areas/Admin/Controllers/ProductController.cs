@@ -16,6 +16,13 @@ namespace Emart.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
             _hostingEnvironment = hostingEnvironment;
         }
+        #region APICALL
+        public IActionResult AllProducts()
+        {
+            var products = _unitOfWork.Product.GetAll(includeProperties:"Category");
+            return Json(new { data = products });
+        }
+        #endregion
         public IActionResult Index()
         {
             ProductVM productVM = new ProductVM();
@@ -57,10 +64,32 @@ namespace Emart.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateUpdate(ProductVM vm,IFormFile file)
+        public IActionResult CreateUpdate(ProductVM vm,IFormFile? file)
         {
             if (ModelState.IsValid)
             {
+                string fileName = String.Empty;
+                if(file != null)
+                {
+                    string uploadDir = Path.Combine(_hostingEnvironment.WebRootPath, "ProductImage");
+                    fileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                    string filePath = Path.Combine(uploadDir, fileName);
+
+                    if(vm.Product.ImageUrl !=null)
+                    {
+                        var oldImagePath = Path.Combine(_hostingEnvironment.WebRootPath, vm.Product.ImageUrl.TrimStart('\\'));
+                        if(System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+                    using(var fileStream = new FileStream(filePath,FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+                    vm.Product.ImageUrl = @"\ProductImage\" + fileName;
+                }
+
                 if(vm.Product.Id==0)
                 {
                     _unitOfWork.Product.Add(vm.Product);
@@ -80,35 +109,42 @@ namespace Emart.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
+        //[HttpGet]
+        //public IActionResult Delete(int? id)
+        //{
+        //    if (id == null || id == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var product = _unitOfWork.Product.GetT(x => x.Id == id);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(product);
+        //}
+        #region DeleteAPICALL
+        [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
             var product = _unitOfWork.Product.GetT(x => x.Id == id);
             if (product == null)
             {
-                return NotFound();
+                return Json(new { success = false, Error = "Error in Fatching data" });
             }
-            return View(product);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteData(int? id)
-        {
-            var product = _unitOfWork.Product.GetT(x => x.Id == id);
-            if (product == null)
+            else
             {
-                return NotFound();
-            }
-            _unitOfWork.Product.Delete(product);
-            _unitOfWork.Save();
-            TempData["success"] = "Product Deleted Done!";
-            return RedirectToAction("Index");
+                var oldImagePath = Path.Combine(_hostingEnvironment.WebRootPath, product.ImageUrl.TrimStart('\\'));
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+                _unitOfWork.Product.Delete(product);
+                _unitOfWork.Save();
+                return Json(new { success = false, Error = "Product Deleted" });
+            }   
         }
+        #endregion
 
 
     }

@@ -8,6 +8,7 @@
   <div class="card-body">
      <form method="post" asp-action="CreateUpdate" enctype="multipart/form-data">
          <input type="hidden" asp-for="Product.Id"/>
+         <input type="hidden" asp-for="Product.ImageUrl"/>
           <div asp-validation-summary="All"></div>
           <div class="mb-3">
              <label asp-for="Product.Name"></label>
@@ -48,7 +49,7 @@
                <button class="btn btn-primary " type="submit">Update</button>
             </div>
             }
-        <a asp-action="Index" asp-controller="Category">Back To List</a>
+        <a asp-action="Index" asp-controller="Product">Back To List</a>
 
      </form>
   </div>
