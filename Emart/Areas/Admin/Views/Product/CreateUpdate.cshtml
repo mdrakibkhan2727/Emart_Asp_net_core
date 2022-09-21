@@ -61,6 +61,18 @@
     <partial name="_ValidationScriptsPartial"/>
     }
     <script>
+
+        tinymce.init({
+          selector: 'textarea',
+          language: 'sv',
+          language_url: '/js/sv.js',
+          plugins: 'myplugin',
+          external_plugins: {
+            'myplugin': '/js/myplugin/plugin.min.js'
+          }
+        });
+
+
         function ValidateEmpty()
         {
             if(document.getElementById("ImageFile").value=="")
